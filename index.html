@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,8 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Agenda Pro">
 <title>Agenda Pro</title>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23185FA5'/%3E%3Crect x='36' y='54' width='108' height='14' rx='7' fill='white'/%3E%3Crect x='36' y='83' width='108' height='14' rx='7' fill='white'/%3E%3Crect x='36' y='112' width='72' height='14' rx='7' fill='white'/%3E%3Ccircle cx='28' cy='61' r='7' fill='%2385B7EB'/%3E%3Ccircle cx='28' cy='90' r='7' fill='%2385B7EB'/%3E%3Ccircle cx='28' cy='119' r='7' fill='%2385B7EB'/%3E%3C/svg%3E">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23185FA5'/%3E%3Crect x='7' y='10' width='18' height='3' rx='1.5' fill='white'/%3E%3Crect x='7' y='15' width='18' height='3' rx='1.5' fill='white'/%3E%3Crect x='7' y='20' width='12' height='3' rx='1.5' fill='white'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" id="apple-touch-icon" href="">
+<link rel="icon" id="favicon" href="">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -685,8 +686,55 @@ function scheduleNotifications(){ if(!notificationsEnabled)return; notifTimers.f
 
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-// Auto-atualiza a cada 30s para detectar tarefas que ficaram atrasadas com o app aberto
+// Auto-atualiza a cada 30s para detectar tarefas atrasadas com o app aberto
 setInterval(()=>{ if(tasks.length) renderTasks(); }, 30000);
+
+// Gera ícone via Canvas (compatível com Safari/iPhone)
+(function generateIcons(){
+  function makeIcon(size){
+    const c=document.createElement('canvas');
+    c.width=size; c.height=size;
+    const ctx=c.getContext('2d');
+    const r=size*0.22;
+    // Fundo azul arredondado
+    ctx.beginPath();
+    ctx.moveTo(r,0); ctx.lineTo(size-r,0);
+    ctx.quadraticCurveTo(size,0,size,r);
+    ctx.lineTo(size,size-r);
+    ctx.quadraticCurveTo(size,size,size-r,size);
+    ctx.lineTo(r,size);
+    ctx.quadraticCurveTo(0,size,0,size-r);
+    ctx.lineTo(0,r);
+    ctx.quadraticCurveTo(0,0,r,0);
+    ctx.closePath();
+    ctx.fillStyle='#185FA5';
+    ctx.fill();
+    // Linhas da lista
+    const lx=size*0.22, lw=size*0.56, lh=size*0.08, br=lh/2;
+    const rows=[0.35,0.50,0.65];
+    rows.forEach((y,i)=>{
+      const w=i===2?lw*0.65:lw;
+      ctx.beginPath();
+      ctx.roundRect(lx, size*y - lh/2, w, lh, br);
+      ctx.fillStyle='rgba(255,255,255,0.95)';
+      ctx.fill();
+    });
+    // Pontinhos à esquerda
+    rows.forEach(y=>{
+      ctx.beginPath();
+      ctx.arc(size*0.14, size*y, size*0.055, 0, Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.fill();
+    });
+    return c.toDataURL('image/png');
+  }
+  try{
+    const big=makeIcon(180);
+    const small=makeIcon(32);
+    document.getElementById('apple-touch-icon').href=big;
+    document.getElementById('favicon').href=small;
+  }catch(e){}
+})();
 
 initClock();
 initFirebase();
