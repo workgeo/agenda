@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -256,8 +255,8 @@ textarea.form-input{resize:none;min-height:80px;line-height:1.5}
 <!-- CONTENT -->
 <div class="content-wrap">
   <div class="filter-bar">
-    <button class="filter-chip active" onclick="setFilter('todas',this)">Todas</button>
-    <button class="filter-chip" onclick="setFilter('hoje',this)">Hoje</button>
+    <button class="filter-chip" onclick="setFilter('todas',this)">Todas</button>
+    <button class="filter-chip active" onclick="setFilter('hoje',this)">Hoje</button>
     <button class="filter-chip" onclick="setFilter('semana',this)">Esta semana</button>
     <button class="filter-chip" onclick="setFilter('atrasadas',this)">Atrasadas</button>
   </div>
@@ -415,7 +414,7 @@ function syncClockFromInput(){ const tv=document.getElementById('f-time').value;
 /* ── FIREBASE ── */
 const FIREBASE_CONFIG_KEY='agendapro_firebase_config';
 let db=null,auth=null,currentUser=null,unsubscribe=null;
-let tasks=[],currentCategory='todas',currentFilter='todas',editingId=null;
+let tasks=[],currentCategory='todas',currentFilter='hoje',editingId=null;
 
 function showToast(msg,type='success'){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast '+type+' show'; setTimeout(()=>t.className='toast',2800); }
 
@@ -629,7 +628,12 @@ function getFilteredTasks(){
   if(currentFilter==='semana'){const end=new Date(today);end.setDate(end.getDate()+7);filtered=filtered.filter(t=>{if(!t.date)return false;const d=new Date(t.date+'T00:00:00');return d>=today&&d<=end;});}
   if(currentFilter==='atrasadas') filtered=filtered.filter(t=>isOverdue(t));
   const sort=document.getElementById('sort-select').value;
-  if(sort==='data') filtered.sort((a,b)=>{if(!a.date&&!b.date)return 0;if(!a.date)return 1;if(!b.date)return -1;return a.date.localeCompare(b.date);});
+  if(sort==='data') filtered.sort((a,b)=>{
+    const da=a.date?(a.time?a.date+'T'+a.time:a.date+'T00:00:00'):null;
+    const db2=b.date?(b.time?b.date+'T'+b.time:b.date+'T00:00:00'):null;
+    if(!da&&!db2)return 0; if(!da)return 1; if(!db2)return -1;
+    return da.localeCompare(db2);
+  });
   if(sort==='prioridade'){const p={alta:0,media:1,baixa:2};filtered.sort((a,b)=>(p[a.priority]||1)-(p[b.priority]||1));}
   if(sort==='titulo') filtered.sort((a,b)=>a.title.localeCompare(b.title));
   return filtered;
