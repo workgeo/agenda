@@ -261,6 +261,7 @@ body{transition:background .3s,color .3s}
 .dark .config-textarea{background:var(--surface-3);border-color:var(--border);color:var(--text-primary)}
 .dark .config-footer .btn-c{background:var(--surface-3);color:var(--text-secondary)}
 .dark .toast{background:#243044}
+.dark #f-recend-qty-wrap span,.dark #f-recurrence-end+div span{color:var(--text-secondary)}
 </style>
 </head>
 <body>
@@ -439,6 +440,21 @@ body{transition:background .3s,color .3s}
         <div style="display:flex;align-items:center;gap:10px">
           <input type="number" class="form-input" id="f-custom-days" min="1" max="365" value="7" style="width:90px">
           <span style="color:var(--gray-600);font-size:15px">dias</span>
+        </div>
+      </div>
+      <div id="recurrence-end-section" style="display:none;margin-bottom:14px">
+        <label class="form-label">Término da recorrência</label>
+        <select class="form-select" id="f-recurrence-end" onchange="updateRecurrenceEndUI()" style="margin-bottom:10px">
+          <option value="nunca">Sem término (repetir sempre)</option>
+          <option value="quantidade">Após quantidade de vezes</option>
+          <option value="data">Em uma data específica</option>
+        </select>
+        <div id="f-recend-qty-wrap" style="display:none;align-items:center;gap:10px">
+          <input type="number" class="form-input" id="f-recend-qty" min="1" max="999" value="10" style="width:90px">
+          <span style="color:var(--gray-600);font-size:14px">vezes no total</span>
+        </div>
+        <div id="f-recend-date-wrap" style="display:none">
+          <input type="date" class="form-input" id="f-recend-date">
         </div>
       </div>
     </div>
@@ -644,6 +660,9 @@ function openModal(taskId=null){
     document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
     if(t.recurrenceDays) t.recurrenceDays.forEach(d=>{const b=document.querySelector(`.day-btn[data-day="${d}"]`);if(b)b.classList.add('active');});
     if(t.customDays) document.getElementById('f-custom-days').value=t.customDays;
+    document.getElementById('f-recurrence-end').value=t.recurrenceEnd||'nunca';
+    if(t.recurrenceEndQty) document.getElementById('f-recend-qty').value=t.recurrenceEndQty;
+    if(t.recurrenceEndDate) document.getElementById('f-recend-date').value=t.recurrenceEndDate;
     if(t.time){const[h,m]=t.time.split(':');setClockTo(parseInt(h),parseInt(m),false);}
     updateRecurrenceUI();
   } else {
@@ -657,13 +676,29 @@ function openModal(taskId=null){
     document.getElementById('f-recurrence').value='nenhuma';
     document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById('f-custom-days').value='7';
+    document.getElementById('f-recurrence-end').value='nunca';
+    document.getElementById('f-recend-qty').value='10';
+    document.getElementById('f-recend-date').value='';
     setClockTo(new Date().getHours(),new Date().getMinutes(),false);
     updateRecurrenceUI();
   }
 }
 
 function closeModal(){ document.getElementById('modal').classList.remove('open'); document.getElementById('clock-picker').classList.remove('open'); editingId=null; }
-function updateRecurrenceUI(){ const v=document.getElementById('f-recurrence').value; document.getElementById('recurrence-days-section').style.display=v==='semanal'?'block':'none'; document.getElementById('recurrence-custom-section').style.display=v==='personalizada'?'block':'none'; }
+function updateRecurrenceUI(){
+  const v=document.getElementById('f-recurrence').value;
+  document.getElementById('recurrence-days-section').style.display=v==='semanal'?'block':'none';
+  document.getElementById('recurrence-custom-section').style.display=v==='personalizada'?'block':'none';
+  document.getElementById('recurrence-end-section').style.display=v!=='nenhuma'?'block':'none';
+  updateRecurrenceEndUI();
+}
+function updateRecurrenceEndUI(){
+  const v=document.getElementById('f-recurrence-end').value;
+  const qw=document.getElementById('f-recend-qty-wrap');
+  const dw=document.getElementById('f-recend-date-wrap');
+  qw.style.display=v==='quantidade'?'flex':'none';
+  dw.style.display=v==='data'?'block':'none';
+}
 function toggleDay(btn){ btn.classList.toggle('active'); }
 
 async function saveTask(){
@@ -672,7 +707,8 @@ async function saveTask(){
   if(!currentUser) return showToast('Faça login ou use modo offline','error');
   const recurrence=document.getElementById('f-recurrence').value;
   const recurrenceDays=recurrence==='semanal'?[...document.querySelectorAll('.day-btn.active')].map(b=>parseInt(b.dataset.day)):[];
-  const task={title,description:document.getElementById('f-desc').value.trim(),date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,category:document.getElementById('f-category').value,priority:document.getElementById('f-priority').value,recurrence,recurrenceDays,customDays:parseInt(document.getElementById('f-custom-days').value)||7,done:editingId?(tasks.find(x=>x.id===editingId)||{}).done||false:false,createdAt:editingId?(tasks.find(x=>x.id===editingId)||{}).createdAt||Date.now():Date.now(),updatedAt:Date.now()};
+  const recurrenceEnd=document.getElementById('f-recurrence-end').value;
+  const task={title,description:document.getElementById('f-desc').value.trim(),date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,category:document.getElementById('f-category').value,priority:document.getElementById('f-priority').value,recurrence,recurrenceDays,customDays:parseInt(document.getElementById('f-custom-days').value)||7,recurrenceEnd,recurrenceEndQty:recurrenceEnd==='quantidade'?parseInt(document.getElementById('f-recend-qty').value)||10:null,recurrenceEndDate:recurrenceEnd==='data'?document.getElementById('f-recend-date').value:null,recurrenceCount:editingId?(tasks.find(x=>x.id===editingId)||{}).recurrenceCount||1:1,done:editingId?(tasks.find(x=>x.id===editingId)||{}).done||false:false,createdAt:editingId?(tasks.find(x=>x.id===editingId)||{}).createdAt||Date.now():Date.now(),updatedAt:Date.now()};
   try{
     if(currentUser.uid==='local'){ if(editingId){const i=tasks.findIndex(x=>x.id===editingId);tasks[i]={...task,id:editingId};}else tasks.unshift({...task,id:Date.now().toString()}); saveLocal();renderTasks();updateCounts(); }
     else{ const col=db.collection('users').doc(currentUser.uid).collection('tasks'); if(editingId) await col.doc(editingId).update(task); else await col.add(task); }
@@ -685,14 +721,24 @@ async function toggleDone(id){
   const done=!task.done;
   if(done&&task.recurrence&&task.recurrence!=='nenhuma'){
     const nextDate=nextOccurrence(task);
-    if(nextDate){
-      const newTask={...task,id:undefined,done:false,date:nextDate,createdAt:Date.now(),updatedAt:Date.now()};
+    // Verifica regras de término
+    let shouldCreate=!!nextDate;
+    if(shouldCreate && task.recurrenceEnd==='quantidade'){
+      shouldCreate=(task.recurrenceCount||1) < (task.recurrenceEndQty||10);
+    }
+    if(shouldCreate && task.recurrenceEnd==='data' && task.recurrenceEndDate){
+      shouldCreate=nextDate <= task.recurrenceEndDate;
+    }
+    if(shouldCreate && nextDate){
+      const newTask={...task,id:undefined,done:false,date:nextDate,recurrenceCount:(task.recurrenceCount||1)+1,createdAt:Date.now(),updatedAt:Date.now()};
       delete newTask.id;
       try{
         if(currentUser.uid==='local'){tasks.push({...newTask,id:(Date.now()+1).toString()});saveLocal();}
         else await db.collection('users').doc(currentUser.uid).collection('tasks').add(newTask);
         showToast('Próxima ocorrência: '+formatDate(nextDate));
       }catch(e){}
+    } else if(done && task.recurrence && task.recurrence!=='nenhuma' && !shouldCreate){
+      showToast('Recorrência encerrada!');
     }
   }
   try{
@@ -782,6 +828,22 @@ async function toggleNotifications(){
   if(perm==='granted'){notificationsEnabled=true;document.getElementById('notif-btn').classList.add('active');document.getElementById('notif-text').textContent='Alertas ativos ✓';showToast('Alertas ativados!');scheduleNotifications();}
   else showToast('Permissão negada','error');
 }
+async function initNotifications(){
+  if(!('Notification'in window)) return;
+  if(Notification.permission==='granted'){
+    notificationsEnabled=true;
+    document.getElementById('notif-btn').classList.add('active');
+    document.getElementById('notif-text').textContent='Alertas ativos ✓';
+  } else if(Notification.permission==='default'){
+    // Pede permissão automaticamente ao carregar
+    const perm=await Notification.requestPermission();
+    if(perm==='granted'){
+      notificationsEnabled=true;
+      document.getElementById('notif-btn').classList.add('active');
+      document.getElementById('notif-text').textContent='Alertas ativos ✓';
+    }
+  }
+}
 function scheduleNotifications(){ if(!notificationsEnabled)return; notifTimers.forEach(clearTimeout);notifTimers=[]; const now=new Date(); tasks.filter(t=>!t.done&&t.date&&t.time).forEach(t=>{const dt=new Date(t.date+'T'+t.time);const diff=dt-now;if(diff>0&&diff<86400000)notifTimers.push(setTimeout(()=>new Notification('⏰ '+t.title,{body:t.description||'Hora da sua tarefa!'}),diff));}); }
 
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
@@ -838,6 +900,7 @@ setInterval(()=>{ if(tasks.length) renderTasks(); }, 30000);
 
 initClock();
 initFirebase();
+initNotifications();
 </script>
 </body>
 </html>
