@@ -773,7 +773,7 @@ function getFilteredTasks(){
     filtered=filtered.filter(t=>{
       if(!t.date) return false;
       const dt=t.time?new Date(t.date+'T'+t.time):new Date(t.date+'T23:59:59');
-      return dt>=now && dt<=in24;
+      return dt<=in24; // vence nas próximas 24h OU já está atrasada
     });
   }
   if(currentFilter==='hoje') filtered=filtered.filter(t=>{if(!t.date)return false;const d=new Date(t.date+'T00:00:00');d.setHours(0,0,0,0);return d.getTime()===today.getTime();});
