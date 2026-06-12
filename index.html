@@ -18,6 +18,7 @@
   --gray-50:#F7F8FA;--gray-100:#EEF0F4;--gray-200:#DDE1E8;--gray-400:#9EA6B4;
   --gray-500:#7A8494;--gray-600:#5F6880;--gray-800:#2D3448;--gray-900:#1A1F2E;
   --red-50:#FCEBEB;--red-200:#F09595;--red-600:#A32D2D;
+  --teal-50:#E1F5EE;--teal-100:#9FE1CB;--teal-200:#5DCAA5;--teal-600:#1D9E75;--teal-700:#0F6E56;--teal-900:#04342C;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -62,6 +63,8 @@ body{font-family:'DM Sans',sans-serif;background:#F0F4FA;color:var(--gray-800);f
 .nav-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;color:var(--gray-600);font-size:14px;font-weight:400;transition:all .12s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
 .nav-item:active{transform:scale(.98)}
 .nav-item.active{background:var(--blue-50);color:var(--blue-600);font-weight:500}
+.nav-concluidas.active{background:var(--teal-50);color:var(--teal-700)}
+.nav-concluidas.active .count{background:var(--teal-100);color:var(--teal-700)}
 .nav-item svg{width:18px;height:18px;flex-shrink:0}
 .nav-item .count{margin-left:auto;font-size:12px;background:var(--gray-100);color:var(--gray-600);padding:2px 8px;border-radius:20px;font-weight:500}
 .nav-item.active .count{background:var(--blue-100);color:var(--blue-600)}
@@ -85,10 +88,11 @@ body{font-family:'DM Sans',sans-serif;background:#F0F4FA;color:var(--gray-800);f
 .tasks-container{display:flex;flex-direction:column;gap:8px}
 .task-card{background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:14px;display:flex;align-items:flex-start;gap:12px;transition:all .12s;position:relative}
 .task-card.atrasada{border-left:3px solid #E24B4A;background:#fffafa}
-.task-card.done{opacity:.5}
+.task-card.done{opacity:.6;border-left:3px solid var(--teal-200)}
+.task-card.atrasada.done{border-left:3px solid var(--teal-200)}
 .task-card.done .task-title{text-decoration:line-through;color:var(--gray-400)}
 .task-check{width:24px;height:24px;border:2px solid var(--gray-200);border-radius:7px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;margin-top:1px}
-.task-check.checked{background:var(--blue-600);border-color:var(--blue-600)}
+.task-check.checked{background:var(--teal-600);border-color:var(--teal-600)}
 .task-check.checked svg{display:block}
 .task-check svg{display:none;width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none}
 .task-body{flex:1;min-width:0}
@@ -114,6 +118,10 @@ body{font-family:'DM Sans',sans-serif;background:#F0F4FA;color:var(--gray-800);f
 .empty-state svg{width:52px;height:52px;margin:0 auto 16px;opacity:.35}
 .empty-state h3{font-size:17px;color:var(--gray-600);margin-bottom:6px;font-weight:500}
 .empty-state p{font-size:14px}
+.empty-state.positive svg{stroke:var(--teal-200);opacity:.8}
+.empty-state.positive h3{color:var(--teal-700)}
+.dark .empty-state.positive svg{stroke:var(--teal-600)}
+.dark .empty-state.positive h3{color:var(--teal-100)}
 
 /* ── FAB ── */
 .fab{position:fixed;bottom:calc(var(--safe-bottom) + 20px);right:20px;width:56px;height:56px;background:var(--blue-600);border:none;border-radius:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(24,95,165,.4);z-index:50;transition:transform .12s}
@@ -191,6 +199,7 @@ textarea.form-input{resize:none;min-height:80px;line-height:1.5}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:#A32D2D}
 .toast.success{background:var(--blue-600)}
+.toast.recurrence{background:var(--teal-700)}
 
 /* ── DARK MODE TOGGLE BUTTON ── */
 .theme-btn{width:100%;padding:10px 14px;background:none;border:1px solid var(--gray-200);border-radius:10px;font-family:inherit;font-size:13px;color:var(--gray-600);cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:6px;transition:all .2s}
@@ -208,6 +217,8 @@ body{transition:background .3s,color .3s}
 .dark .nav-item{color:var(--text-secondary)}
 .dark .nav-item:hover{background:var(--surface-3);color:var(--text-primary)}
 .dark .nav-item.active{background:rgba(24,95,165,.25);color:#5BA8E5}
+.dark .nav-concluidas.active{background:rgba(15,110,86,.25);color:#5DCAA5}
+.dark .nav-concluidas.active .count{background:rgba(15,110,86,.3);color:#5DCAA5}
 .dark .nav-item .count{background:var(--surface-3);color:var(--text-secondary)}
 .dark .nav-item.active .count{background:rgba(24,95,165,.3);color:#5BA8E5}
 .dark .drawer-bottom{border-color:var(--border)}
@@ -225,6 +236,8 @@ body{transition:background .3s,color .3s}
 .dark .task-title{color:var(--text-primary)}
 .dark .task-desc{color:var(--text-secondary)}
 .dark .task-check{border-color:var(--border-2)}
+.dark .task-check.checked{background:var(--teal-700);border-color:var(--teal-700)}
+.dark .task-card.done{border-left-color:var(--teal-700)}
 .dark .badge-alta{background:#2A1414;color:#F08080}
 .dark .badge-media{background:#241A0A;color:#D4A055}
 .dark .badge-baixa{background:#0E1F12;color:#6DBF7A}
@@ -261,6 +274,7 @@ body{transition:background .3s,color .3s}
 .dark .config-textarea{background:var(--surface-3);border-color:var(--border);color:var(--text-primary)}
 .dark .config-footer .btn-c{background:var(--surface-3);color:var(--text-secondary)}
 .dark .toast{background:#243044}
+.dark .toast.recurrence{background:var(--teal-700)}
 .dark #f-recend-qty-wrap span,.dark #f-recurrence-end+div span{color:var(--text-secondary)}
 </style>
 </head>
@@ -309,7 +323,7 @@ body{transition:background .3s,color .3s}
     <button class="nav-item" onclick="setCategory('saude',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Saúde<span class="count" id="count-saude">0</span></button>
     <button class="nav-item" onclick="setCategory('outros',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Outros<span class="count" id="count-outros">0</span></button>
     <div class="nav-label" style="margin-top:4px">Status</div>
-    <button class="nav-item" onclick="setCategory('concluidas',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Concluídas<span class="count" id="count-concluidas">0</span></button>
+    <button class="nav-item nav-concluidas" onclick="setCategory('concluidas',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Concluídas<span class="count" id="count-concluidas">0</span></button>
   </nav>
   <div class="drawer-bottom">
     <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">
@@ -736,10 +750,10 @@ async function toggleDone(id){
       try{
         if(currentUser.uid==='local'){tasks.push({...newTask,id:(Date.now()+1).toString()});saveLocal();}
         else await db.collection('users').doc(currentUser.uid).collection('tasks').add(newTask);
-        showToast('Próxima ocorrência: '+formatDate(nextDate));
+        showToast('Próxima ocorrência: '+formatDate(nextDate),'recurrence');
       }catch(e){}
     } else if(done && task.recurrence && task.recurrence!=='nenhuma' && !shouldCreate){
-      showToast('Recorrência encerrada!');
+      showToast('Recorrência encerrada!','recurrence');
     }
   }
   try{
@@ -804,7 +818,8 @@ function renderTasks(){
   if(!filtered.length){
     const msgs={embreve:['Tudo tranquilo!','Nenhuma tarefa vence nas próximas 24h'],hoje:['Dia livre!','Nenhuma tarefa para hoje'],atrasadas:['Em dia!','Nenhuma tarefa atrasada'],todas:['Sem tarefas','Toque em + para começar']};
     const [h,p]=msgs[currentFilter]||['Nenhuma tarefa','Toque em + para começar'];
-    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg><h3>${h}</h3><p>${p}</p></div>`;
+    const positive=['embreve','hoje','atrasadas'].includes(currentFilter);
+    container.innerHTML=`<div class="empty-state${positive?' positive':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">${positive?'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>':'<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/>'}</svg><h3>${h}</h3><p>${p}</p></div>`;
     return;
   }
   container.innerHTML=filtered.map(t=>{
